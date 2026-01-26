@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html lang="es" x-data="{ darkMode: true, musicPlaying: false }" :class="{ 'dark': darkMode }">
+<html lang="es" class="scroll-smooth" x-data="{ 
+    darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    toggleTheme() {
+        this.darkMode = !this.darkMode;
+        localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
+        if (this.darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }
+}" x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')); if(darkMode) document.documentElement.classList.add('dark');">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanilla Experience | Forge 1.20.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vanilla Experience | Soft Edition</title>
     
+    <!-- LIBRERÍAS EXTERNAS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -12,290 +24,438 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- CONFIGURACIÓN DE TAILWIND -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: { vividPink: '#f43f5e' },
-                    fontFamily: { apple: ['Inter', '-apple-system', 'sans-serif'] }
+                    colors: { 
+                        softPink: '#fff1f2', 
+                        accentPink: '#fb7185',
+                        deepRose: '#be123c',
+                        darkBg: '#020617',
+                        darkCard: '#0f172a',
+                        darkText: '#e2e8f0',
+                    },
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'] 
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 40px -15px rgba(251, 113, 133, 0.15)',
+                    }
                 }
             }
         }
     </script>
 
+    <!-- ESTILOS PERSONALIZADOS -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
 
-        [x-cloak] { display: none !important; }
-        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #ffffff;
             overflow-x: hidden;
-            transition: background-color 0.5s ease;
-        }
-        .dark body { background-color: #050505; }
-
-        .font-logo { font-weight: 900; letter-spacing: -0.06em; text-transform: uppercase; }
-
-        .logo-alive {
-            background: linear-gradient(90deg, #f43f5e, #fb7185, #f43f5e);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            animation: shine 3s linear infinite, breathe 4s ease-in-out infinite;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
-        @keyframes shine { to { background-position: 200% center; } }
-        @keyframes breathe {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(244, 63, 94, 0)); }
-            50% { transform: scale(1.02); filter: drop-shadow(0 0 20px rgba(244, 63, 94, 0.3)); }
+        /* DISEÑO GLASS */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: background 0.5s ease, border-color 0.5s ease;
+        }
+        .dark .glass-nav {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(0,0,0,0.05);
+        /* TARJETAS */
+        .soft-card {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px -10px rgba(251, 113, 133, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.5s ease;
+            overflow: hidden;
         }
-        .dark .glass {
-            background: rgba(10, 10, 10, 0.7);
-            border: 1px solid rgba(255,255,255,0.05);
+        .dark .soft-card {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         }
-
-        .shimmer-card {
-            background: linear-gradient(90deg, #121212 25%, #1d1d1d 50%, #121212 75%);
-            background-size: 200% 100%;
-            animation: shimmerEffect 2s infinite;
+        .soft-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(251, 113, 133, 0.25);
         }
-        @keyframes shimmerEffect { to { background-position-x: -200%; } }
-
-        #transition-curtain {
-            position: fixed;
-            inset: 0;
-            background: #f43f5e;
-            z-index: 100;
-            transform: translateY(100%);
+        .dark .soft-card:hover {
+            box-shadow: 0 20px 40px -10px rgba(251, 113, 133, 0.15);
         }
 
-        /* CLASE PARA ELEMENTOS OCULTOS QUE SE REVELAN AL SCROLL */
-        .reveal-on-scroll {
-            opacity: 0;
-            transform: translateY(100px); /* Empiezan más abajo */
-            visibility: hidden; /* Evita que se vean antes de tiempo */
-        }
-
-        #music-player {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
+        /* BOTONES */
+        .btn-rose {
+            background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+            color: white;
+            border-radius: 99px;
+            font-weight: 700;
             transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -5px rgba(244, 63, 94, 0.4);
         }
+        
+        /* TEXT SHINE ANIMATION (NUEVO) */
+        .text-shine {
+            background-size: 200% auto;
+            animation: shine-flow 4s linear infinite;
+        }
+        @keyframes shine-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* UTILIDADES */
+        .fade-in-up { opacity: 0; transform: translateY(30px); }
+        
+        /* FONDO ANIMADO */
+        .blob-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden; transition: opacity 0.5s ease; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 20s infinite alternate ease-in-out; }
+        .dark .blob { opacity: 0.25; filter: blur(100px); }
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(30px, 50px); } }
+
+        /* ANIMACIONES FLOTANTES */
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float { animation: float-slow 5s ease-in-out infinite; }
+        .animate-float-delay { animation: float-slow 6s ease-in-out infinite; animation-delay: 2s; }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff1f2; }
+        .dark ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #fecdd3; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        ::-webkit-scrollbar-thumb:hover { background: #fb7185; }
     </style>
 </head>
-<body class="text-slate-900 dark:text-white" 
-      @click.once="document.getElementById('bg-music').play().then(() => musicPlaying = true).catch(e => console.log(e))">
+<body class="bg-softPink text-slate-900 dark:bg-darkBg dark:text-darkText">
 
-    <div id="transition-curtain"></div>
-
-    <audio id="bg-music" loop>
-        <source src="musica.mp3" type="audio/mp3">
-        <source src="Víctor%20Mendivil%20-%20Jacobo%20Grinberg%20(Video%20Oficial).mp3" type="audio/mp3">
-    </audio>
-
-    <div id="music-player" 
-         class="glass p-3 rounded-full magnetic cursor-pointer hover:scale-110" 
-         @click="toggleAudio()">
-        <div x-show="musicPlaying" class="flex items-center gap-1 h-6">
-            <span class="block w-1 h-3 bg-vividPink animate-[bounce_1s_infinite]"></span>
-            <span class="block w-1 h-5 bg-vividPink animate-[bounce_1.2s_infinite]"></span>
-            <span class="block w-1 h-2 bg-vividPink animate-[bounce_0.8s_infinite]"></span>
+    <!-- 1. PRELOADER (NUEVO) -->
+    <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-softPink dark:bg-darkBg transition-colors duration-500">
+        <div class="text-center">
+            <h2 class="text-4xl font-black tracking-tighter text-rose-500 animate-pulse">VANILLA</h2>
+            <p class="text-slate-400 text-sm tracking-widest mt-2 uppercase">Cargando experiencia...</p>
         </div>
-        <i data-lucide="volume-x" x-show="!musicPlaying" class="text-zinc-500 w-6 h-6"></i>
     </div>
 
-    <nav class="fixed w-full z-50 px-6 py-4">
-        <div class="max-w-6xl mx-auto glass rounded-full px-8 py-3 flex items-center justify-between shadow-2xl">
-            <span class="font-logo text-vividPink text-xl tracking-tighter">VANILLA</span>
-            
-<div class="flex space-x-6 md:space-x-10 text-[10px] font-black tracking-[0.2em]">
-    <a href="#inicio" class="nav-link hover:text-vividPink transition-all duration-300">INICIO</a>
-    <a href="#explorar" class="nav-link hover:text-vividPink transition-all duration-300">EXPLORAR</a>
-    <a href="#descargas" class="nav-link hover:text-vividPink transition-all duration-300">DESCARGAS</a>
-</div>
+    <!-- 2. BARRA DE PROGRESO -->
+    <div class="fixed top-0 left-0 h-1 bg-gradient-to-r from-rose-300 via-pink-500 to-rose-300 z-[100]" id="progressBar" style="width: 0%"></div>
 
-            <div class="flex items-center space-x-6">
-                <button @click="darkMode = !darkMode" class="hover:scale-125 transition-transform">
-                    <i data-lucide="sun" x-show="darkMode" class="text-vividPink"></i>
-                    <i data-lucide="moon" x-show="!darkMode" class="text-vividPink"></i>
+    <!-- 3. FONDO ANIMADO -->
+    <div class="blob-bg">
+        <div class="blob bg-pink-200 dark:bg-indigo-900 w-96 h-96 top-0 left-0"></div>
+        <div class="blob bg-rose-200 dark:bg-rose-900 w-[500px] h-[500px] bottom-0 right-0 animation-delay-2000"></div>
+    </div>
+
+    <!-- 4. NAVEGACIÓN -->
+    <nav class="fixed top-0 w-full z-50 px-4 py-4 flex justify-center">
+        <div class="glass-nav rounded-full px-2 py-2 pl-6 flex items-center gap-4 shadow-soft max-w-4xl w-full justify-between transition-colors duration-500">
+            
+            <a href="#inicio" onclick="smoothScroll(event, '#inicio')" class="magnetic-btn font-black text-xl tracking-tighter text-rose-500 hover:scale-105 transition-transform inline-block">
+                VANILLA
+            </a>
+
+            <div class="hidden md:flex gap-8 text-sm font-bold text-slate-500 dark:text-slate-400">
+                <a href="#features" onclick="smoothScroll(event, '#features')" class="magnetic-btn hover:text-rose-500 dark:hover:text-rose-400 transition-colors inline-block">Características</a>
+                <a href="#gallery" onclick="smoothScroll(event, '#gallery')" class="magnetic-btn hover:text-rose-500 dark:hover:text-rose-400 transition-colors inline-block">Galería</a>
+                <a href="#requisitos" onclick="smoothScroll(event, '#requisitos')" class="magnetic-btn hover:text-rose-500 dark:hover:text-rose-400 transition-colors inline-block">Requisitos</a>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Toggle Dark Mode -->
+                <button @click="toggleTheme()" class="magnetic-btn w-10 h-10 rounded-full flex items-center justify-center text-slate-500 dark:text-yellow-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
+                    <i x-show="darkMode" data-lucide="sun" class="w-5 h-5"></i>
                 </button>
-                <a href="https://instagram.com/img.yahir" target="_blank" class="magnetic text-vividPink">
-                    <i data-lucide="instagram"></i>
+
+                <!-- Instagram -->
+                <a href="https://instagram.com/img.yahir" target="_blank" 
+                   class="magnetic-btn w-10 h-10 rounded-full bg-pink-50 dark:bg-slate-800 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all duration-300">
+                    <i data-lucide="instagram" class="w-5 h-5"></i>
+                </a>
+
+                <a href="#descargas" onclick="smoothScroll(event, '#descargas')" class="hidden sm:flex btn-rose px-6 py-2.5 text-xs tracking-wider magnetic-btn">
+                    DESCARGAR
                 </a>
             </div>
         </div>
     </nav>
 
-    <section id="inicio" class="min-h-screen flex flex-col items-center justify-center text-center px-6 relative overflow-hidden">
-        <div class="absolute w-[800px] h-[800px] bg-vividPink/5 rounded-full blur-[120px] -z-10 animate-pulse"></div>
+    <!-- 5. HERO -->
+    <section id="inicio" class="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-32">
+        <div class="space-y-6 max-w-3xl relative z-10 mt-12">
+            
+            <span class="inline-block py-1 px-4 rounded-full bg-white dark:bg-slate-800 border border-pink-100 dark:border-slate-700 text-rose-400 text-xs font-bold tracking-widest fade-in-up uppercase animate-float transition-colors duration-500">
+                Forge 1.20.1
+            </span>
 
-        <h1 id="main-logo" class="font-logo text-7xl md:text-[11rem] leading-none mb-6 logo-alive text-transparent opacity-0">
-            VANILLA<br>EXPERIENCE
-        </h1>
-        
-        <p class="intro-reveal text-xl md:text-3xl font-medium text-slate-500 dark:text-zinc-500 max-w-2xl mb-12 opacity-0 translate-y-8">
-            minecraft con un sazon diferente 
-            <span id="hero-emoji" style="display: inline-block; opacity: 0;">😘</span>
-        </p>
+            <!-- Título con efecto SHINE (Nuevo) -->
+            <h1 class="text-6xl md:text-8xl font-black text-slate-800 dark:text-slate-100 leading-[0.9] fade-in-up tracking-tighter transition-colors duration-500">
+                Minecraft.<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-pink-500 to-rose-400 text-shine">
+                    Pero Bonito.
+                </span>
+            </h1>
 
-        <div class="intro-reveal opacity-0 translate-y-8">
-            <a href="#descargas" class="magnetic group relative px-12 py-5 bg-vividPink text-white rounded-full font-logo text-lg overflow-hidden transition-all shadow-2xl shadow-rose-500/20">
-                <span class="relative z-10">DESCARGAR MODPACK</span>
-            </a>
+            <p class="text-lg md:text-xl text-slate-500 dark:text-slate-400 font-medium max-w-xl mx-auto fade-in-up transition-colors duration-500">
+                Una experiencia visual suave, optimizada y llena de detalles estéticos que transforman tu mundo.
+            </p>
+
+            <div class="flex justify-center gap-4 fade-in-up pt-4">
+                <a href="#features" onclick="smoothScroll(event, '#features')" class="magnetic-btn group relative px-8 py-4 bg-white dark:bg-slate-800 text-rose-500 font-bold rounded-full shadow-lg hover:shadow-xl transition-all overflow-hidden cursor-pointer border border-transparent dark:border-slate-700">
+                    <span class="relative z-10 group-hover:text-rose-600 dark:group-hover:text-rose-400">Explorar Modpack</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-16 relative w-full max-w-4xl fade-in-up" onmousemove="tiltImage(event, this)" onmouseleave="resetTilt(this)">
+            <div class="absolute inset-0 bg-rose-500 blur-[80px] opacity-20 dark:opacity-10 rounded-full animate-pulse"></div>
+            <img id="hero-image" 
+                 src="https://cdn.modrinth.com/data/8oi3bsk5/images/be7daf4d0023204165ab00cfa7815f8068bc951b.jpeg" 
+                 class="relative rounded-[3rem] shadow-2xl border-4 border-white dark:border-slate-700 w-full object-cover h-[300px] md:h-[500px] transition-all duration-500 ease-out" 
+                 style="transform-style: preserve-3d;"
+                 alt="Paisaje Minecraft">
         </div>
     </section>
 
-    <section id="explorar" class="py-32 px-6 max-w-6xl mx-auto">
-        <h2 class="reveal-on-scroll font-logo text-5xl md:text-7xl mb-20 text-center tracking-tighter">CARACTERÍSTICAS</h2>
+    <!-- 6. FEATURES -->
+    <section id="features" class="py-24 px-4 max-w-6xl mx-auto">
+        <h2 class="text-4xl font-black text-center mb-16 text-slate-800 dark:text-white fade-in-up transition-colors duration-500">Detalles que Enamoran</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="reveal-on-scroll card-hover glass p-10 rounded-[3.5rem] group hover:bg-vividPink transition-all duration-500 border-none">
-                <div class="mb-8 text-vividPink group-hover:text-white transition-colors">
-                    <i data-lucide="zap" size="48" class="icon-spin"></i>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="soft-card p-8 flex flex-col items-center text-center fade-in-up">
+                <div class="w-16 h-16 bg-pink-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-rose-500 mb-6 animate-float transition-colors duration-500">
+                    <i data-lucide="eye" class="w-8 h-8"></i>
                 </div>
-                <h3 class="font-logo text-2xl mb-4 group-hover:text-white transition-colors">Optimización</h3>
-                <p class="text-zinc-500 dark:text-zinc-400 group-hover:text-white/80 transition-colors font-medium">
-                    Mods de rendimiento que duplican tus FPS y eliminan el stuttering.
-                </p>
+                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">Visuales</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Mejoras visuales sin perder la esencia vanilla.</p>
             </div>
 
-            <div class="reveal-on-scroll card-hover glass p-10 rounded-[3.5rem] group hover:bg-vividPink transition-all duration-500 border-none">
-                <div class="mb-8 text-vividPink group-hover:text-white transition-colors">
-                    <i data-lucide="mountain" size="48" class="icon-spin"></i>
+            <div class="soft-card md:col-span-2 p-8 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group fade-in-up">
+                <div class="relative z-20 text-center md:text-left flex flex-col items-center md:items-start">
+                    <div class="w-16 h-16 bg-green-100 dark:bg-slate-800 rounded-2xl flex md:hidden items-center justify-center text-green-600 mb-4 animate-float-delay transition-colors duration-500">
+                        <i data-lucide="mountain" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2 text-slate-800 dark:text-slate-100">Terreno</h3>
+                    <p class="text-slate-500 dark:text-slate-400 mb-6 font-medium max-w-xs md:max-w-none">Nueva generación de terreno y biomas espectaculares.</p>
+                    <a href="#gallery" onclick="smoothScroll(event, '#gallery')" class="magnetic-btn inline-flex items-center gap-2 text-rose-500 font-bold text-sm bg-pink-50 dark:bg-slate-800 px-5 py-3 rounded-full hover:bg-rose-500 hover:text-white transition-all cursor-pointer shadow-sm">
+                        Ver Galería <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
                 </div>
-                <h3 class="font-logo text-2xl mb-4 group-hover:text-white transition-colors">Generación</h3>
-                <p class="text-zinc-500 dark:text-zinc-400 group-hover:text-white/80 transition-colors font-medium">
-                    Terrenos y biomas rediseñados para una exploración épica y variada.
-                </p>
+                <img src="https://cdn.modrinth.com/data/8oi3bsk5/images/8eb1319d93336ca3ac29578e029459c3c0ec5132.jpeg" class="absolute right-0 top-0 h-full w-1/2 object-cover opacity-60 mask-image-gradient group-hover:scale-110 transition-transform duration-700 hidden md:block z-10">
             </div>
 
-            <div class="reveal-on-scroll card-hover glass p-10 rounded-[3.5rem] group hover:bg-vividPink transition-all duration-500 border-none">
-                <div class="mb-8 text-vividPink group-hover:text-white transition-colors">
-                    <i data-lucide="sparkles" size="48" class="icon-spin"></i>
+            <div class="soft-card p-8 flex flex-col items-center text-center fade-in-up">
+                <div class="w-16 h-16 bg-pink-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-rose-500 mb-6 animate-float-delay transition-colors duration-500">
+                    <i data-lucide="zap" class="w-8 h-8"></i>
                 </div>
-                <h3 class="font-logo text-2xl mb-4 group-hover:text-white transition-colors">Visuales</h3>
-                <p class="text-zinc-500 dark:text-zinc-400 group-hover:text-white/80 transition-colors font-medium">
-                    Gráficos mejorados con un toque elegante sin perder la esencia original.
-                </p>
+                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">FPS Altos</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Optimización extrema para jugar fluido.</p>
+            </div>
+
+            <div class="soft-card p-8 flex flex-col items-center text-center fade-in-up">
+                <div class="w-16 h-16 bg-pink-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-rose-500 mb-6 animate-float transition-colors duration-500">
+                    <i data-lucide="music" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">Ambiente</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Sonidos ambientales y música inmersiva.</p>
+            </div>
+            
+             <div class="soft-card md:col-span-2 relative overflow-hidden min-h-[200px] group fade-in-up">
+                <img src="https://cdn.modrinth.com/data/yJYb14Sx/images/dc6a92f638b82271adbf078d8e484f3d7a29a17f.png" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <h3 class="text-white font-black text-2xl tracking-widest border-2 border-white px-6 py-2 animate-float-delay">NETHER ESTÉTICO</h3>
+                </div>
             </div>
         </div>
     </section>
 
-    <section class="py-20 px-6 max-w-6xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div class="reveal-on-scroll shimmer-card h-[400px] rounded-[3.5rem] flex items-center justify-center border border-white/5 group overflow-hidden">
-                <span class="font-logo text-zinc-700 text-2xl group-hover:scale-125 transition-transform duration-700">PRÓXIMAMENTE</span>
-            </div>
-            <div class="reveal-on-scroll shimmer-card h-[400px] rounded-[3.5rem] flex items-center justify-center border border-white/5 group overflow-hidden">
-                <span class="font-logo text-zinc-700 text-2xl group-hover:scale-125 transition-transform duration-700">PRÓXIMAMENTE</span>
+    <!-- 7. SLIDER -->
+    <section id="gallery" class="py-20 px-4">
+        <div class="max-w-5xl mx-auto soft-card p-2 fade-in-up bg-white dark:bg-slate-900 transition-colors duration-500">
+            <h3 class="text-center font-bold text-slate-400 uppercase tracking-widest text-xs py-4">Comparativa Antes / Después</h3>
+            
+            <div x-data="{ 
+                    slider: 50, 
+                    containerWidth: 0,
+                    updateWidth() { this.containerWidth = $refs.container.offsetWidth },
+                    updateSlider(e) {
+                        const rect = $refs.container.getBoundingClientRect();
+                        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                        this.slider = Math.min(Math.max((x / rect.width) * 100, 0), 100);
+                    }
+                 }"
+                 x-init="updateWidth(); window.addEventListener('resize', () => updateWidth())"
+                 x-ref="container"
+                 @mousemove="updateSlider($event)"
+                 @touchmove.prevent="updateSlider($event)"
+                 class="relative w-full h-[400px] md:h-[500px] rounded-[25px] overflow-hidden cursor-ew-resize select-none group">
+                
+                <img src="https://cdn.modrinth.com/data/HXF82T3G/images/ac58d07f520735877379b664863aaf5fa8785fc4.png" class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none" alt="After">
+                
+                <div class="absolute inset-y-0 left-0 border-r-4 border-white dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden select-none pointer-events-none transition-colors" :style="`width: ${slider}%`">
+                    <img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/b/b1/Mountain_Biome.png/revision/latest/scale-to-width-down/1200?cb=20201018191234" class="absolute inset-y-0 left-0 max-w-none h-full object-cover grayscale" :style="`width: ${containerWidth}px`" alt="Before">
+                </div>
+
+                <div class="absolute inset-y-0 pointer-events-none" :style="`left: ${slider}%`">
+                    <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 bg-rose-500 rounded-full shadow-lg flex items-center justify-center text-white border-4 border-white dark:border-slate-800 transition-colors z-20">
+                        <i data-lucide="chevrons-left-right" class="w-4 h-4"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <footer id="descargas" class="py-40 text-center relative px-6 overflow-hidden">
-        <h2 class="reveal-on-scroll font-logo text-6xl md:text-[9rem] mb-12 tracking-tighter">ESTÁS LISTO?</h2>
-        
-        <div class="reveal-on-scroll flex flex-col items-center gap-16">
-            <button class="magnetic px-20 py-8 bg-vividPink text-white rounded-full font-logo text-2xl hover:scale-110 hover:shadow-2xl hover:shadow-rose-500/40 transition-all active:scale-95">
-                DESCARGAR
+    <!-- 8. REQUISITOS -->
+    <section id="requisitos" class="py-10 px-4 max-w-4xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="fade-in-up bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-pink-50 dark:border-slate-800 transition-colors duration-500">
+                <h3 class="text-rose-500 font-bold text-lg mb-4">Mínimos</h3>
+                <ul class="text-sm text-slate-500 dark:text-slate-400 space-y-2">
+                    <li class="flex justify-between"><span>RAM:</span> <b>3 GB</b></li>
+                    <li class="flex justify-between"><span>CPU:</span> <b>Intel i3</b></li>
+                </ul>
+            </div>
+            <div class="fade-in-up bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-soft border border-pink-100 dark:border-slate-800 relative overflow-hidden transition-colors duration-500">
+                <div class="absolute top-0 right-0 bg-rose-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">RECOMENDADO</div>
+                <h3 class="text-rose-500 font-bold text-lg mb-4">Ideal (Con Shaders)</h3>
+                <ul class="text-sm text-slate-500 dark:text-slate-400 space-y-2">
+                    <li class="flex justify-between"><span>RAM:</span> <b>6 GB</b></li>
+                    <li class="flex justify-between"><span>CPU:</span> <b>Intel i5 / Ryzen 5</b></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. FOOTER -->
+    <footer id="descargas" class="py-32 px-4 text-center relative overflow-hidden bg-white dark:bg-slate-900 mt-20 rounded-t-[3rem] transition-colors duration-500">
+        <div class="max-w-2xl mx-auto relative z-10">
+            <h2 class="text-5xl md:text-7xl font-black text-slate-800 dark:text-slate-100 mb-8 tracking-tighter fade-in-up">¿Listo para empezar?</h2>
+            
+            <button id="downloadBtn" onclick="animateDownload()" class="btn-rose magnetic-btn px-12 py-6 text-xl shadow-xl hover:shadow-2xl relative overflow-hidden group w-full md:w-auto min-w-[300px] fade-in-up">
+                <span class="relative z-10 flex items-center justify-center gap-2" id="btnText">
+                    DESCARGAR AHORA
+                </span>
+                <div id="btnProgress" class="absolute inset-0 bg-rose-600 w-0 transition-none"></div>
             </button>
 
-            <div class="flex flex-col items-center">
-                <span class="text-vividPink font-black tracking-[0.4em] text-[10px] mb-4">DESARROLLADO POR</span>
-                <a href="https://instagram.com/img.yahir" target="_blank" class="font-logo text-4xl hover:text-vividPink transition-colors flex items-center gap-4">
-                    <i data-lucide="instagram" size="40"></i> img.yahir
+            <div class="mt-16 pt-10 border-t border-slate-100 dark:border-slate-800 fade-in-up transition-colors">
+                <p class="text-slate-400 dark:text-slate-500 text-sm mb-4">Desarrollado con <span class="text-pink-500">♥</span> por</p>
+                <a href="https://instagram.com/img.yahir" target="_blank" class="magnetic-btn inline-flex items-center gap-2 text-2xl font-bold text-slate-800 dark:text-slate-200 hover:text-rose-500 transition-colors">
+                    <i data-lucide="instagram" class="w-8 h-8 text-rose-500"></i>
+                    img.yahir
                 </a>
             </div>
         </div>
     </footer>
 
+    <!-- 10. AUDIO -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+        <div x-data="{ isPlaying: false, toggle() { this.isPlaying ? this.$refs.audio.pause() : this.$refs.audio.play(); this.isPlaying = !this.isPlaying } }" 
+             class="magnetic-btn bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-full p-2 pl-4 pr-2 flex items-center gap-4 shadow-2xl border border-white/50 dark:border-slate-600 hover:scale-105 transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-slate-700 flex items-center justify-center text-rose-500">
+                    <i data-lucide="music" class="w-4 h-4"></i>
+                </div>
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-200 pr-2">Música Soft</span>
+            </div>
+            <button @click="toggle()" class="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-colors">
+                <i x-show="!isPlaying" data-lucide="play" class="w-4 h-4 ml-0.5 fill-current"></i>
+                <i x-show="isPlaying" data-lucide="pause" class="w-4 h-4 fill-current"></i>
+            </button>
+            <audio x-ref="audio" loop src="musica.mp3"></audio>
+        </div>
+    </div>
+
+    <!-- 11. SCRIPTS LÓGICOS -->
     <script>
         lucide.createIcons();
         gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-        // 1. CONTROL DE AUDIO MEJORADO
-        function toggleAudio() {
-            const audio = document.getElementById('bg-music');
-            const alpineData = document.querySelector('[x-data]').__x.$data;
-            
-            if (audio.paused) {
-                audio.play().then(() => alpineData.musicPlaying = true);
-            } else {
-                audio.pause();
-                alpineData.musicPlaying = false;
-            }
+        // PRELOADER
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+            tl.to("#preloader h2, #preloader p", { opacity: 0, y: -20, duration: 0.5, delay: 0.5 })
+              .to("#preloader", { yPercent: -100, duration: 1.2, ease: "power4.inOut" });
+        });
+
+        // SCROLL
+        function smoothScroll(e, targetId) {
+            e.preventDefault();
+            gsap.to(window, { duration: 1.5, scrollTo: { y: targetId, offsetY: 80 }, ease: "power4.inOut" });
         }
 
-        // 2. ANIMACIONES HERO (INTRO)
-        const introTl = gsap.timeline();
-        introTl.to("#main-logo", { opacity: 1, duration: 1.5, ease: "power2.out" })
-               .from("#main-logo", { y: 100, duration: 1.5, ease: "expo.out" }, "<")
-               .to(".intro-reveal", { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: "power4.out" }, "-=0.5")
-               .to("#hero-emoji", { scale: 1, opacity: 1, rotation: -20, duration: 1.2, ease: "elastic.out(1.5, 0.4)" }, "-=0.8");
-
-
-        // 3. ANIMACIONES AL HACER SCROLL (SOLUCIONADO)
-        // Usamos batch para agrupar elementos y animarlos cuando entran
-        ScrollTrigger.batch(".reveal-on-scroll", {
-            start: "top 85%", // La animación comienza cuando el elemento está al 85% de la ventana
+        // FADE IN
+        ScrollTrigger.batch(".fade-in-up", {
+            start: "top 90%",
             onEnter: batch => {
-                gsap.to(batch, {
-                    autoAlpha: 1, // Maneja opacity + visibility
-                    y: 0,
-                    stagger: 0.15,
-                    duration: 1.2,
-                    ease: "power4.out",
-                    overwrite: true
-                });
+                gsap.to(batch, { opacity: 1, y: 0, stagger: 0.1, duration: 1, ease: "power3.out", overwrite: true });
             }
         });
 
-        // 4. EFECTOS INTERACTIVOS (Nav y Mouse)
-        document.querySelectorAll('.magnetic').forEach(el => {
-            el.addEventListener('mousemove', (e) => {
-                const rect = el.getBoundingClientRect();
+        // DESCARGA
+        function animateDownload() {
+            const btn = document.getElementById('downloadBtn');
+            const progress = document.getElementById('btnProgress');
+            const text = document.getElementById('btnText');
+            if(btn.dataset.loading) return;
+            btn.dataset.loading = "true";
+            text.innerHTML = 'PREPARANDO...';
+            gsap.to(progress, {
+                width: "100%", duration: 2, ease: "power2.inOut",
+                onComplete: () => {
+                    text.innerHTML = '¡LISTO!';
+                    gsap.to(btn, { backgroundColor: "#10b981", duration: 0.3 });
+                    setTimeout(() => window.location.href = "https://curseforge.com", 800);
+                }
+            });
+        }
+
+        // TILT
+        function tiltImage(e, container) {
+            const img = container.querySelector('#hero-image');
+            const rect = container.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = ((e.clientY - rect.top - centerY) / 25) * -1;
+            const rotateY = (e.clientX - rect.left - centerX) / 25;
+            img.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        }
+        function resetTilt(container) {
+            container.querySelector('#hero-image').style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
+        }
+
+        // PROGRESS BAR
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            document.getElementById("progressBar").style.width = ((winScroll / height) * 100) + "%";
+        });
+
+        // EFECTO MAGNÉTICO (NUEVO)
+        const magneticBtns = document.querySelectorAll('.magnetic-btn');
+        magneticBtns.forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
                 const x = e.clientX - rect.left - rect.width / 2;
                 const y = e.clientY - rect.top - rect.height / 2;
-                gsap.to(el, { x: x * 0.4, y: y * 0.4, duration: 0.3 });
+                gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.3, ease: "power2.out" });
             });
-            el.addEventListener('mouseleave', () => {
-                gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.3)" });
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
             });
-        });
-
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', e => {
-                e.preventDefault();
-                const target = link.getAttribute('href');
-                const curtain = document.querySelector('#transition-curtain');
-                gsap.to(curtain, {
-                    y: "0%", duration: 0.6, ease: "expo.inOut",
-                    onComplete: () => {
-                        gsap.to(window, { scrollTo: target, duration: 0 });
-                        gsap.to(curtain, { y: "-100%", duration: 0.6, delay: 0.2 });
-                        gsap.set(curtain, { y: "100%", delay: 0.8 });
-                    }
-                });
-            });
-        });
-
-        document.querySelectorAll('.card-hover').forEach(card => {
-            const icon = card.querySelector('.icon-spin');
-            card.addEventListener('mouseenter', () => gsap.to(icon, { rotate: 360, scale: 1.2, duration: 0.5 }));
-            card.addEventListener('mouseleave', () => gsap.to(icon, { rotate: 0, scale: 1, duration: 0.5 }));
         });
     </script>
 </body>
 </html>
-
