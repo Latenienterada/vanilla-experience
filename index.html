@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth" x-data="{ 
     darkMode: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    mobileMenu: false,
     toggleTheme() {
         this.darkMode = !this.darkMode;
         localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
@@ -43,6 +44,7 @@
                     },
                     boxShadow: {
                         'soft': '0 20px 40px -15px rgba(251, 113, 133, 0.15)',
+                        'glow': '0 0 20px rgba(251, 113, 133, 0.5)',
                     }
                 }
             }
@@ -78,6 +80,7 @@
             box-shadow: 0 10px 30px -10px rgba(251, 113, 133, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.5s ease;
             overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
         .dark .soft-card {
             background: #0f172a;
@@ -88,8 +91,20 @@
             transform: translateY(-5px);
             box-shadow: 0 20px 40px -10px rgba(251, 113, 133, 0.25);
         }
-        .dark .soft-card:hover {
-            box-shadow: 0 20px 40px -10px rgba(251, 113, 133, 0.15);
+
+        /* BENTO GRID SPECIFIC */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .bento-grid {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(2, 250px);
+            }
+            .col-span-2 { grid-column: span 2; }
+            .row-span-2 { grid-row: span 2; }
         }
 
         /* BOTONES */
@@ -101,8 +116,9 @@
             transition: all 0.3s ease;
             box-shadow: 0 10px 20px -5px rgba(244, 63, 94, 0.4);
         }
+        .btn-rose:hover { transform: scale(1.05); }
         
-        /* TEXT SHINE ANIMATION (NUEVO) */
+        /* TEXT SHINE ANIMATION */
         .text-shine {
             background-size: 200% auto;
             animation: shine-flow 4s linear infinite;
@@ -122,30 +138,21 @@
         .dark .blob { opacity: 0.25; filter: blur(100px); }
         @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(30px, 50px); } }
 
-        /* ANIMACIONES FLOTANTES */
-        @keyframes float-slow {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .animate-float { animation: float-slow 5s ease-in-out infinite; }
-        .animate-float-delay { animation: float-slow 6s ease-in-out infinite; animation-delay: 2s; }
-
         /* SCROLLBAR */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #fff1f2; }
-        .dark ::-webkit-scrollbar-track { background: #020617; }
-        ::-webkit-scrollbar-thumb { background: #fecdd3; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #fb7185; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
-        ::-webkit-scrollbar-thumb:hover { background: #fb7185; }
     </style>
 </head>
-<body class="bg-softPink text-slate-900 dark:bg-darkBg dark:text-darkText">
+<body class="bg-softPink text-slate-900 dark:bg-darkBg dark:text-darkText selection:bg-rose-200 dark:selection:bg-rose-900">
 
-    <!-- 1. PRELOADER (NUEVO) -->
+    <!-- 1. PRELOADER -->
     <div id="preloader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-softPink dark:bg-darkBg transition-colors duration-500">
-        <div class="text-center">
-            <h2 class="text-4xl font-black tracking-tighter text-rose-500 animate-pulse">VANILLA</h2>
-            <p class="text-slate-400 text-sm tracking-widest mt-2 uppercase">Cargando experiencia...</p>
+        <div class="text-center relative">
+            <div class="absolute inset-0 bg-rose-500 blur-2xl opacity-20 animate-pulse rounded-full"></div>
+            <h2 class="relative text-5xl font-black tracking-tighter text-rose-500">VANILLA</h2>
+            <p class="relative text-slate-400 text-xs tracking-[0.3em] mt-2 uppercase font-bold">Soft Edition</p>
         </div>
     </div>
 
@@ -154,231 +161,299 @@
 
     <!-- 3. FONDO ANIMADO -->
     <div class="blob-bg">
-        <div class="blob bg-pink-200 dark:bg-indigo-900 w-96 h-96 top-0 left-0"></div>
+        <div class="blob bg-pink-300 dark:bg-indigo-900 w-[600px] h-[600px] -top-20 -left-20"></div>
         <div class="blob bg-rose-200 dark:bg-rose-900 w-[500px] h-[500px] bottom-0 right-0 animation-delay-2000"></div>
     </div>
 
-    <!-- 4. NAVEGACIÓN -->
+    <!-- 4. NAVEGACIÓN (AHORA RESPONSIVE) -->
     <nav class="fixed top-0 w-full z-50 px-4 py-4 flex justify-center">
-        <div class="glass-nav rounded-full px-2 py-2 pl-6 flex items-center gap-4 shadow-soft max-w-4xl w-full justify-between transition-colors duration-500">
+        <div class="glass-nav rounded-2xl px-4 py-3 md:rounded-full md:px-6 md:py-2 flex flex-col md:flex-row items-center shadow-soft max-w-4xl w-full justify-between transition-all duration-300">
             
-            <a href="#inicio" onclick="smoothScroll(event, '#inicio')" class="magnetic-btn font-black text-xl tracking-tighter text-rose-500 hover:scale-105 transition-transform inline-block">
-                VANILLA
-            </a>
-
-            <div class="hidden md:flex gap-8 text-sm font-bold text-slate-500 dark:text-slate-400">
-                <a href="#features" onclick="smoothScroll(event, '#features')" class="magnetic-btn hover:text-rose-500 dark:hover:text-rose-400 transition-colors inline-block">Características</a>
-                <a href="#gallery" onclick="smoothScroll(event, '#gallery')" class="magnetic-btn hover:text-rose-500 dark:hover:text-rose-400 transition-colors inline-block">Galería</a>
-                <a href="#requisitos" onclick="smoothScroll(event, '#requisitos')" class="magnetic-btn hover:text-rose-500 dark:hover:text-rose-400 transition-colors inline-block">Requisitos</a>
+            <!-- Logo y Botón Móvil -->
+            <div class="w-full md:w-auto flex justify-between items-center">
+                <a href="#inicio" onclick="smoothScroll(event, '#inicio')" class="magnetic-btn font-black text-xl tracking-tighter text-rose-500 hover:scale-105 transition-transform inline-block">
+                    VANILLA
+                </a>
+                
+                <!-- Botón Hamburguesa (Solo Móvil) -->
+                <button @click="mobileMenu = !mobileMenu" class="md:hidden text-slate-500 dark:text-slate-300 p-2">
+                    <i :data-lucide="mobileMenu ? 'x' : 'menu'" class="w-6 h-6"></i>
+                </button>
             </div>
 
-            <div class="flex items-center gap-3">
-                <!-- Toggle Dark Mode -->
-                <button @click="toggleTheme()" class="magnetic-btn w-10 h-10 rounded-full flex items-center justify-center text-slate-500 dark:text-yellow-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                    <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5"></i>
-                    <i x-show="darkMode" data-lucide="sun" class="w-5 h-5"></i>
+            <!-- Links Escritorio -->
+            <div class="hidden md:flex gap-8 text-sm font-bold text-slate-500 dark:text-slate-400 items-center">
+                <a href="#features" onclick="smoothScroll(event, '#features')" class="hover:text-rose-500 transition-colors">Características</a>
+                <a href="#mods" onclick="smoothScroll(event, '#mods')" class="hover:text-rose-500 transition-colors">Mods</a>
+                <a href="#requisitos" onclick="smoothScroll(event, '#requisitos')" class="hover:text-rose-500 transition-colors">Requisitos</a>
+            </div>
+
+            <!-- Botones Acción -->
+            <div class="hidden md:flex items-center gap-3">
+                <button @click="toggleTheme()" class="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 dark:text-yellow-400 hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                    <i x-show="!darkMode" data-lucide="moon" class="w-4 h-4"></i>
+                    <i x-show="darkMode" data-lucide="sun" class="w-4 h-4"></i>
                 </button>
+                <a href="#descargas" onclick="smoothScroll(event, '#descargas')" class="btn-rose px-5 py-2 text-xs tracking-wider font-bold">DESCARGAR</a>
+            </div>
 
-                <!-- Instagram -->
-                <a href="https://instagram.com/img.yahir" target="_blank" 
-                   class="magnetic-btn w-10 h-10 rounded-full bg-pink-50 dark:bg-slate-800 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-all duration-300">
-                    <i data-lucide="instagram" class="w-5 h-5"></i>
-                </a>
-
-                <a href="#descargas" onclick="smoothScroll(event, '#descargas')" class="hidden sm:flex btn-rose px-6 py-2.5 text-xs tracking-wider magnetic-btn">
-                    DESCARGAR
-                </a>
+            <!-- Menú Móvil Desplegable -->
+            <div x-show="mobileMenu" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-2"
+                 class="w-full md:hidden flex flex-col gap-4 pt-4 pb-2 border-t border-slate-100 dark:border-slate-800 mt-3 text-center">
+                
+                <a @click="mobileMenu = false" href="#features" class="font-bold text-slate-600 dark:text-slate-300 py-2">Características</a>
+                <a @click="mobileMenu = false" href="#mods" class="font-bold text-slate-600 dark:text-slate-300 py-2">Mods Incluidos</a>
+                <a @click="mobileMenu = false" href="#requisitos" class="font-bold text-slate-600 dark:text-slate-300 py-2">Requisitos</a>
+                
+                <div class="flex justify-center gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <button @click="toggleTheme()" class="p-2 rounded-full bg-slate-100 dark:bg-slate-800">
+                        <i x-show="!darkMode" data-lucide="moon" class="w-5 h-5 text-slate-600"></i>
+                        <i x-show="darkMode" data-lucide="sun" class="w-5 h-5 text-yellow-400"></i>
+                    </button>
+                    <a href="#descargas" class="btn-rose px-6 py-2 rounded-full text-sm font-bold">Descargar</a>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- 5. HERO -->
-    <section id="inicio" class="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-32">
-        <div class="space-y-6 max-w-3xl relative z-10 mt-12">
+    <section id="inicio" class="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-28">
+        <div class="space-y-6 max-w-3xl relative z-10 mt-8">
             
-            <span class="inline-block py-1 px-4 rounded-full bg-white dark:bg-slate-800 border border-pink-100 dark:border-slate-700 text-rose-400 text-xs font-bold tracking-widest fade-in-up uppercase animate-float transition-colors duration-500">
-                Forge 1.20.1
-            </span>
+            <div class="flex justify-center gap-2 fade-in-up">
+                <span class="inline-block py-1 px-4 rounded-full bg-white/50 dark:bg-slate-800/50 border border-rose-200 dark:border-rose-900/50 text-rose-500 text-[10px] font-bold tracking-widest uppercase">
+                    Versión 2.0
+                </span>
+                <span class="inline-block py-1 px-4 rounded-full bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-[10px] font-bold tracking-widest uppercase">
+                    1.20.1 Forge
+                </span>
+            </div>
 
-            <!-- Título con efecto SHINE (Nuevo) -->
-            <h1 class="text-6xl md:text-8xl font-black text-slate-800 dark:text-slate-100 leading-[0.9] fade-in-up tracking-tighter transition-colors duration-500">
-                Minecraft.<br>
+            <h1 class="text-6xl md:text-8xl font-black text-slate-800 dark:text-slate-100 leading-[0.9] fade-in-up tracking-tighter">
+                Minecraft<br>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-pink-500 to-rose-400 text-shine">
-                    Pero Bonito.
+                    Aesthetics
                 </span>
             </h1>
 
-            <p class="text-lg md:text-xl text-slate-500 dark:text-slate-400 font-medium max-w-xl mx-auto fade-in-up transition-colors duration-500">
-                Una experiencia visual suave, optimizada y llena de detalles estéticos que transforman tu mundo.
+            <p class="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-lg mx-auto fade-in-up">
+                Redescubre tu mundo con shaders optimizados, sonidos inmersivos y una estética visual suave.
             </p>
 
-            <div class="flex justify-center gap-4 fade-in-up pt-4">
-                <a href="#features" onclick="smoothScroll(event, '#features')" class="magnetic-btn group relative px-8 py-4 bg-white dark:bg-slate-800 text-rose-500 font-bold rounded-full shadow-lg hover:shadow-xl transition-all overflow-hidden cursor-pointer border border-transparent dark:border-slate-700">
-                    <span class="relative z-10 group-hover:text-rose-600 dark:group-hover:text-rose-400">Explorar Modpack</span>
+            <div class="flex justify-center fade-in-up pt-4">
+                <a href="#mods" onclick="smoothScroll(event, '#mods')" class="magnetic-btn px-8 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all border border-transparent hover:border-rose-200 dark:hover:border-slate-600 flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-rose-500"></i>
+                    Ver Contenido
                 </a>
             </div>
         </div>
 
-        <div class="mt-16 relative w-full max-w-4xl fade-in-up" onmousemove="tiltImage(event, this)" onmouseleave="resetTilt(this)">
-            <div class="absolute inset-0 bg-rose-500 blur-[80px] opacity-20 dark:opacity-10 rounded-full animate-pulse"></div>
+        <div class="mt-12 relative w-full max-w-4xl fade-in-up group" onmousemove="tiltImage(event, this)" onmouseleave="resetTilt(this)">
+            <div class="absolute -inset-4 bg-gradient-to-r from-rose-500 to-pink-500 opacity-20 blur-2xl rounded-[3rem] group-hover:opacity-30 transition-opacity duration-500"></div>
             <img id="hero-image" 
                  src="https://cdn.modrinth.com/data/8oi3bsk5/images/be7daf4d0023204165ab00cfa7815f8068bc951b.jpeg" 
-                 class="relative rounded-[3rem] shadow-2xl border-4 border-white dark:border-slate-700 w-full object-cover h-[300px] md:h-[500px] transition-all duration-500 ease-out" 
+                 class="relative rounded-[2rem] md:rounded-[3rem] shadow-2xl border-4 border-white dark:border-slate-700 w-full object-cover h-[300px] md:h-[450px] transition-all duration-100 ease-out" 
                  style="transform-style: preserve-3d;"
                  alt="Paisaje Minecraft">
         </div>
     </section>
 
-    <!-- 6. FEATURES -->
+    <!-- 6. FEATURES (MEJORADO) -->
     <section id="features" class="py-24 px-4 max-w-6xl mx-auto">
-        <h2 class="text-4xl font-black text-center mb-16 text-slate-800 dark:text-white fade-in-up transition-colors duration-500">Detalles que Enamoran</h2>
+        <div class="text-center mb-16 fade-in-up">
+            <h2 class="text-3xl md:text-4xl font-black text-slate-800 dark:text-white">Experiencia Renovada</h2>
+            <p class="text-slate-400 mt-2">Pequeños cambios, gran diferencia.</p>
+        </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="soft-card p-8 flex flex-col items-center text-center fade-in-up">
-                <div class="w-16 h-16 bg-pink-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-rose-500 mb-6 animate-float transition-colors duration-500">
-                    <i data-lucide="eye" class="w-8 h-8"></i>
+            <!-- Card 1 -->
+            <div class="soft-card p-8 group fade-in-up hover:bg-rose-50 dark:hover:bg-slate-800/80">
+                <div class="w-14 h-14 bg-rose-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center text-rose-500 mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="leaf" class="w-7 h-7"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">Visuales</h3>
-                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Mejoras visuales sin perder la esencia vanilla.</p>
+                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">Naturaleza Viva</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Hojas frondosas, pasto conectado y flores nuevas que dan vida a cada bioma.</p>
             </div>
 
-            <div class="soft-card md:col-span-2 p-8 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group fade-in-up">
-                <div class="relative z-20 text-center md:text-left flex flex-col items-center md:items-start">
-                    <div class="w-16 h-16 bg-green-100 dark:bg-slate-800 rounded-2xl flex md:hidden items-center justify-center text-green-600 mb-4 animate-float-delay transition-colors duration-500">
-                        <i data-lucide="mountain" class="w-8 h-8"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold mb-2 text-slate-800 dark:text-slate-100">Terreno</h3>
-                    <p class="text-slate-500 dark:text-slate-400 mb-6 font-medium max-w-xs md:max-w-none">Nueva generación de terreno y biomas espectaculares.</p>
-                    <a href="#gallery" onclick="smoothScroll(event, '#gallery')" class="magnetic-btn inline-flex items-center gap-2 text-rose-500 font-bold text-sm bg-pink-50 dark:bg-slate-800 px-5 py-3 rounded-full hover:bg-rose-500 hover:text-white transition-all cursor-pointer shadow-sm">
-                        Ver Galería <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </a>
+            <!-- Card 2 -->
+            <div class="soft-card p-8 group fade-in-up hover:bg-rose-50 dark:hover:bg-slate-800/80">
+                <div class="w-14 h-14 bg-purple-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center text-purple-500 mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="zap" class="w-7 h-7"></i>
                 </div>
-                <img src="https://cdn.modrinth.com/data/8oi3bsk5/images/8eb1319d93336ca3ac29578e029459c3c0ec5132.jpeg" class="absolute right-0 top-0 h-full w-1/2 object-cover opacity-60 mask-image-gradient group-hover:scale-110 transition-transform duration-700 hidden md:block z-10">
+                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">Rendimiento</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Gracias a Embeddium y Oculus, disfruta de shaders sin sacrificar tus FPS.</p>
             </div>
 
-            <div class="soft-card p-8 flex flex-col items-center text-center fade-in-up">
-                <div class="w-16 h-16 bg-pink-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-rose-500 mb-6 animate-float-delay transition-colors duration-500">
-                    <i data-lucide="zap" class="w-8 h-8"></i>
+            <!-- Card 3 -->
+            <div class="soft-card p-8 group fade-in-up hover:bg-rose-50 dark:hover:bg-slate-800/80">
+                <div class="w-14 h-14 bg-blue-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center text-blue-500 mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="music-2" class="w-7 h-7"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">FPS Altos</h3>
-                <p class="text-slate-500 dark:text-slate-400 text-sm">Optimización extrema para jugar fluido.</p>
-            </div>
-
-            <div class="soft-card p-8 flex flex-col items-center text-center fade-in-up">
-                <div class="w-16 h-16 bg-pink-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-rose-500 mb-6 animate-float transition-colors duration-500">
-                    <i data-lucide="music" class="w-8 h-8"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">Ambiente</h3>
-                <p class="text-slate-500 dark:text-slate-400 text-sm">Sonidos ambientales y música inmersiva.</p>
-            </div>
-            
-             <div class="soft-card md:col-span-2 relative overflow-hidden min-h-[200px] group fade-in-up">
-                <img src="https://cdn.modrinth.com/data/yJYb14Sx/images/dc6a92f638b82271adbf078d8e484f3d7a29a17f.png" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <h3 class="text-white font-black text-2xl tracking-widest border-2 border-white px-6 py-2 animate-float-delay">NETHER ESTÉTICO</h3>
-                </div>
+                <h3 class="text-xl font-bold mb-2 text-slate-800 dark:text-slate-100">Sonido 3D</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Ambiente sonoro realista con reverberación en cuevas y sonidos de pasos mejorados.</p>
             </div>
         </div>
     </section>
 
-    <!-- 7. SLIDER -->
-    <section id="gallery" class="py-20 px-4">
-        <div class="max-w-5xl mx-auto soft-card p-2 fade-in-up bg-white dark:bg-slate-900 transition-colors duration-500">
-            <h3 class="text-center font-bold text-slate-400 uppercase tracking-widest text-xs py-4">Comparativa Antes / Después</h3>
-            
-            <div x-data="{ 
-                    slider: 50, 
-                    containerWidth: 0,
-                    updateWidth() { this.containerWidth = $refs.container.offsetWidth },
-                    updateSlider(e) {
-                        const rect = $refs.container.getBoundingClientRect();
-                        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                        this.slider = Math.min(Math.max((x / rect.width) * 100, 0), 100);
-                    }
-                 }"
-                 x-init="updateWidth(); window.addEventListener('resize', () => updateWidth())"
-                 x-ref="container"
-                 @mousemove="updateSlider($event)"
-                 @touchmove.prevent="updateSlider($event)"
-                 class="relative w-full h-[400px] md:h-[500px] rounded-[25px] overflow-hidden cursor-ew-resize select-none group">
-                
-                <img src="https://cdn.modrinth.com/data/HXF82T3G/images/ac58d07f520735877379b664863aaf5fa8785fc4.png" class="absolute inset-0 w-full h-full object-cover select-none pointer-events-none" alt="After">
-                
-                <div class="absolute inset-y-0 left-0 border-r-4 border-white dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden select-none pointer-events-none transition-colors" :style="`width: ${slider}%`">
-                    <img src="https://static.wikia.nocookie.net/minecraft_gamepedia/images/b/b1/Mountain_Biome.png/revision/latest/scale-to-width-down/1200?cb=20201018191234" class="absolute inset-y-0 left-0 max-w-none h-full object-cover grayscale" :style="`width: ${containerWidth}px`" alt="Before">
-                </div>
+    <!-- 7. BENTO GRID (REEMPLAZO DE GALERÍA) -->
+    <section id="mods" class="py-10 px-4 max-w-6xl mx-auto">
+        <h2 class="text-3xl font-black text-center mb-12 text-slate-800 dark:text-white fade-in-up">
+            Mods Destacados
+            <span class="block text-sm font-normal text-rose-500 mt-1 uppercase tracking-widest">Lo que incluye el pack</span>
+        </h2>
 
-                <div class="absolute inset-y-0 pointer-events-none" :style="`left: ${slider}%`">
-                    <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 bg-rose-500 rounded-full shadow-lg flex items-center justify-center text-white border-4 border-white dark:border-slate-800 transition-colors z-20">
-                        <i data-lucide="chevrons-left-right" class="w-4 h-4"></i>
+        <div class="bento-grid fade-in-up">
+            
+            <!-- Item Grande (Visuals) -->
+            <div class="col-span-2 row-span-2 soft-card relative group p-0 border-0">
+                <img src="https://cdn.modrinth.com/data/r4IM74M2/images/2b7e5e3478952b61f953051412b184f86d634992.png" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8">
+                    <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <span class="text-rose-400 text-xs font-bold uppercase tracking-wider mb-2 block">Gráficos</span>
+                        <h3 class="text-white text-3xl font-bold">Complimentary Shaders</h3>
+                        <p class="text-slate-300 text-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity delay-100">La iluminación perfecta. Ni muy brillante, ni muy oscura.</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Item Mediano (Physics) -->
+            <div class="soft-card relative group p-6 flex flex-col justify-between overflow-hidden bg-gradient-to-br from-indigo-50 to-white dark:from-slate-800 dark:to-slate-900">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i data-lucide="box" class="w-24 h-24"></i>
+                </div>
+                <div>
+                    <i data-lucide="cuboid" class="w-8 h-8 text-indigo-500 mb-4"></i>
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Física de Items</h3>
+                </div>
+                <p class="text-slate-500 dark:text-slate-400 text-xs mt-2">Los objetos caen de forma realista en el suelo.</p>
+            </div>
+
+            <!-- Item Mediano (Map) -->
+            <div class="soft-card relative group p-0 overflow-hidden">
+                <img src="https://cdn.modrinth.com/data/u5I70h6W/images/6b01b6978433434199c1583e74218e81577716be.png" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
+                <div class="absolute bottom-0 left-0 p-6 w-full bg-gradient-to-t from-black/70 to-transparent">
+                    <h3 class="text-white font-bold">Xaero's Map</h3>
+                    <p class="text-slate-300 text-xs">Minimapa minimalista.</p>
+                </div>
+            </div>
+
+            <!-- Item Largo (Detail) -->
+            <div class="col-span-2 soft-card p-6 flex items-center justify-between bg-rose-500 text-white relative overflow-hidden group">
+                <div class="absolute inset-0 bg-black/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                <div class="relative z-10">
+                    <h3 class="text-2xl font-bold">Better Leaves & Grass</h3>
+                    <p class="text-rose-100 text-sm mt-1">La vegetación nunca se vio tan bien.</p>
+                </div>
+                <div class="relative z-10 bg-white/20 p-3 rounded-full">
+                    <i data-lucide="trees" class="w-6 h-6 text-white"></i>
+                </div>
+            </div>
+
         </div>
     </section>
 
-    <!-- 8. REQUISITOS -->
-    <section id="requisitos" class="py-10 px-4 max-w-4xl mx-auto">
-        <div class="grid md:grid-cols-2 gap-8">
-            <div class="fade-in-up bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-pink-50 dark:border-slate-800 transition-colors duration-500">
-                <h3 class="text-rose-500 font-bold text-lg mb-4">Mínimos</h3>
-                <ul class="text-sm text-slate-500 dark:text-slate-400 space-y-2">
-                    <li class="flex justify-between"><span>RAM:</span> <b>3 GB</b></li>
-                    <li class="flex justify-between"><span>CPU:</span> <b>Intel i3</b></li>
+    <!-- 8. REQUISITOS & INSTALACIÓN -->
+    <section id="requisitos" class="py-20 px-4 max-w-4xl mx-auto">
+        
+        <!-- Requisitos -->
+        <div class="grid md:grid-cols-2 gap-8 mb-20">
+            <div class="fade-in-up bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
+                <h3 class="text-slate-800 dark:text-white font-bold text-lg mb-4 flex items-center gap-2">
+                    <i data-lucide="cpu" class="w-5 h-5 text-slate-400"></i> Mínimos
+                </h3>
+                <ul class="text-sm text-slate-500 dark:text-slate-400 space-y-3">
+                    <li class="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2"><span>RAM Asignada:</span> <b>3 GB</b></li>
+                    <li class="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2"><span>Procesador:</span> <b>Intel Core i3</b></li>
+                    <li class="flex justify-between"><span>Gráfica:</span> <b>Integrada OK</b></li>
                 </ul>
             </div>
-            <div class="fade-in-up bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-soft border border-pink-100 dark:border-slate-800 relative overflow-hidden transition-colors duration-500">
+            <div class="fade-in-up bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-soft border border-rose-100 dark:border-slate-800 relative overflow-hidden">
                 <div class="absolute top-0 right-0 bg-rose-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">RECOMENDADO</div>
-                <h3 class="text-rose-500 font-bold text-lg mb-4">Ideal (Con Shaders)</h3>
-                <ul class="text-sm text-slate-500 dark:text-slate-400 space-y-2">
-                    <li class="flex justify-between"><span>RAM:</span> <b>6 GB</b></li>
-                    <li class="flex justify-between"><span>CPU:</span> <b>Intel i5 / Ryzen 5</b></li>
+                <h3 class="text-rose-500 font-bold text-lg mb-4 flex items-center gap-2">
+                    <i data-lucide="zap" class="w-5 h-5"></i> Ideal
+                </h3>
+                <ul class="text-sm text-slate-500 dark:text-slate-400 space-y-3">
+                    <li class="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2"><span>RAM Asignada:</span> <b>6 GB</b></li>
+                    <li class="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-2"><span>Procesador:</span> <b>Ryzen 5 / i5</b></li>
+                    <li class="flex justify-between"><span>Gráfica:</span> <b>GTX 1050+</b></li>
                 </ul>
+            </div>
+        </div>
+
+        <!-- Pasos de Instalación (NUEVO) -->
+        <div class="fade-in-up">
+            <h3 class="text-center font-bold text-slate-800 dark:text-white mb-8">¿Cómo instalar?</h3>
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 relative">
+                <!-- Línea conectora -->
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-slate-100 dark:bg-slate-800 -z-10"></div>
+
+                <!-- Paso 1 -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm w-full md:w-1/3 text-center border border-slate-100 dark:border-slate-800">
+                    <div class="w-10 h-10 bg-rose-100 dark:bg-slate-800 text-rose-500 font-black rounded-full flex items-center justify-center mx-auto mb-4">1</div>
+                    <h4 class="font-bold text-sm">Descarga</h4>
+                    <p class="text-xs text-slate-400 mt-1">Baja el archivo .zip del botón de abajo.</p>
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm w-full md:w-1/3 text-center border border-slate-100 dark:border-slate-800">
+                    <div class="w-10 h-10 bg-rose-100 dark:bg-slate-800 text-rose-500 font-black rounded-full flex items-center justify-center mx-auto mb-4">2</div>
+                    <h4 class="font-bold text-sm">Importar</h4>
+                    <p class="text-xs text-slate-400 mt-1">Abre CurseForge y dale a "Import Profile".</p>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm w-full md:w-1/3 text-center border border-slate-100 dark:border-slate-800">
+                    <div class="w-10 h-10 bg-rose-100 dark:bg-slate-800 text-rose-500 font-black rounded-full flex items-center justify-center mx-auto mb-4">3</div>
+                    <h4 class="font-bold text-sm">Jugar</h4>
+                    <p class="text-xs text-slate-400 mt-1">Asigna la RAM y disfruta.</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- 9. FOOTER -->
-    <footer id="descargas" class="py-32 px-4 text-center relative overflow-hidden bg-white dark:bg-slate-900 mt-20 rounded-t-[3rem] transition-colors duration-500">
+    <footer id="descargas" class="py-24 px-4 text-center relative overflow-hidden bg-white dark:bg-slate-900 mt-20 rounded-t-[3rem] transition-colors duration-500">
         <div class="max-w-2xl mx-auto relative z-10">
-            <h2 class="text-5xl md:text-7xl font-black text-slate-800 dark:text-slate-100 mb-8 tracking-tighter fade-in-up">¿Listo para empezar?</h2>
+            <h2 class="text-4xl md:text-6xl font-black text-slate-800 dark:text-slate-100 mb-8 tracking-tighter fade-in-up">Empieza tu aventura</h2>
             
-            <button id="downloadBtn" onclick="animateDownload()" class="btn-rose magnetic-btn px-12 py-6 text-xl shadow-xl hover:shadow-2xl relative overflow-hidden group w-full md:w-auto min-w-[300px] fade-in-up">
+            <button id="downloadBtn" onclick="animateDownload()" class="btn-rose magnetic-btn px-10 py-5 text-lg shadow-xl hover:shadow-2xl relative overflow-hidden group w-full md:w-auto min-w-[280px] fade-in-up">
                 <span class="relative z-10 flex items-center justify-center gap-2" id="btnText">
-                    DESCARGAR AHORA
+                    <i data-lucide="download-cloud" class="w-5 h-5"></i>
+                    DESCARGAR PACK
                 </span>
-                <div id="btnProgress" class="absolute inset-0 bg-rose-600 w-0 transition-none"></div>
+                <div id="btnProgress" class="absolute inset-0 bg-green-500 w-0 transition-none"></div>
             </button>
 
-            <div class="mt-16 pt-10 border-t border-slate-100 dark:border-slate-800 fade-in-up transition-colors">
-                <p class="text-slate-400 dark:text-slate-500 text-sm mb-4">Desarrollado con <span class="text-pink-500">♥</span> por</p>
-                <a href="https://instagram.com/img.yahir" target="_blank" class="magnetic-btn inline-flex items-center gap-2 text-2xl font-bold text-slate-800 dark:text-slate-200 hover:text-rose-500 transition-colors">
-                    <i data-lucide="instagram" class="w-8 h-8 text-rose-500"></i>
+            <div class="mt-16 pt-10 border-t border-slate-100 dark:border-slate-800 fade-in-up">
+                <p class="text-slate-400 text-sm mb-4">Desarrollado con <span class="text-pink-500">♥</span> por</p>
+                <a href="https://instagram.com/img.yahir" target="_blank" class="inline-flex items-center gap-2 font-bold text-slate-700 dark:text-slate-200 hover:text-rose-500 transition-colors">
+                    <i data-lucide="instagram" class="w-5 h-5"></i>
                     img.yahir
                 </a>
             </div>
         </div>
     </footer>
 
-    <!-- 10. AUDIO -->
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+    <!-- 10. AUDIO FLOTANTE -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
         <div x-data="{ isPlaying: false, toggle() { this.isPlaying ? this.$refs.audio.pause() : this.$refs.audio.play(); this.isPlaying = !this.isPlaying } }" 
-             class="magnetic-btn bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-full p-2 pl-4 pr-2 flex items-center gap-4 shadow-2xl border border-white/50 dark:border-slate-600 hover:scale-105 transition-all">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-slate-700 flex items-center justify-center text-rose-500">
-                    <i data-lucide="music" class="w-4 h-4"></i>
-                </div>
-                <span class="text-xs font-bold text-slate-700 dark:text-slate-200 pr-2">Música Soft</span>
-            </div>
-            <button @click="toggle()" class="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-colors">
-                <i x-show="!isPlaying" data-lucide="play" class="w-4 h-4 ml-0.5 fill-current"></i>
-                <i x-show="isPlaying" data-lucide="pause" class="w-4 h-4 fill-current"></i>
+             class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-full p-1.5 pl-4 pr-1.5 flex items-center gap-3 shadow-2xl border border-white/50 dark:border-slate-600 hover:scale-105 transition-all">
+            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-wider">Soundtrack</span>
+            <button @click="toggle()" class="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-colors">
+                <i x-show="!isPlaying" data-lucide="play" class="w-3 h-3 ml-0.5 fill-current"></i>
+                <i x-show="isPlaying" data-lucide="pause" class="w-3 h-3 fill-current"></i>
             </button>
             <audio x-ref="audio" loop src="musica.mp3"></audio>
         </div>
     </div>
 
-    <!-- 11. SCRIPTS LÓGICOS -->
+    <!-- SCRIPTS -->
     <script>
         lucide.createIcons();
         gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
@@ -390,71 +465,75 @@
               .to("#preloader", { yPercent: -100, duration: 1.2, ease: "power4.inOut" });
         });
 
-        // SCROLL
+        // SCROLL SUAVE
         function smoothScroll(e, targetId) {
             e.preventDefault();
-            gsap.to(window, { duration: 1.5, scrollTo: { y: targetId, offsetY: 80 }, ease: "power4.inOut" });
+            const target = document.querySelector(targetId);
+            if (target) {
+                gsap.to(window, { duration: 1.2, scrollTo: { y: target, offsetY: 80 }, ease: "power4.inOut" });
+            }
         }
 
-        // FADE IN
+        // ANIMACIÓN AL APARECER
         ScrollTrigger.batch(".fade-in-up", {
-            start: "top 90%",
+            start: "top 85%",
             onEnter: batch => {
-                gsap.to(batch, { opacity: 1, y: 0, stagger: 0.1, duration: 1, ease: "power3.out", overwrite: true });
+                gsap.to(batch, { opacity: 1, y: 0, stagger: 0.15, duration: 1, ease: "power3.out", overwrite: true });
             }
         });
 
-        // DESCARGA
+        // EFECTO TILT 3D (HERO)
+        function tiltImage(e, container) {
+            const img = container.querySelector('#hero-image');
+            const rect = container.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            // Cálculo suave de rotación
+            const rotateX = ((e.clientY - rect.top - centerY) / 20) * -1;
+            const rotateY = (e.clientX - rect.left - centerX) / 20;
+            
+            gsap.to(img, {
+                transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`,
+                duration: 0.5,
+                ease: "power1.out"
+            });
+        }
+        
+        function resetTilt(container) {
+            const img = container.querySelector('#hero-image');
+            gsap.to(img, {
+                transform: `perspective(1000px) rotateX(0) rotateY(0) scale(1)`,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        }
+
+        // DESCARGA FALSA ANIMADA
         function animateDownload() {
             const btn = document.getElementById('downloadBtn');
             const progress = document.getElementById('btnProgress');
             const text = document.getElementById('btnText');
             if(btn.dataset.loading) return;
             btn.dataset.loading = "true";
+            
             text.innerHTML = 'PREPARANDO...';
+            
             gsap.to(progress, {
                 width: "100%", duration: 2, ease: "power2.inOut",
                 onComplete: () => {
-                    text.innerHTML = '¡LISTO!';
-                    gsap.to(btn, { backgroundColor: "#10b981", duration: 0.3 });
-                    setTimeout(() => window.location.href = "https://curseforge.com", 800);
+                    text.innerHTML = '¡DESCARGA INICIADA!';
+                    text.style.color = 'white';
+                    // CAMBIA ESTO POR TU LINK REAL DE CURSEFORGE/MEDIAFIRE
+                    setTimeout(() => window.location.href = "https://curseforge.com", 1000);
                 }
             });
         }
 
-        // TILT
-        function tiltImage(e, container) {
-            const img = container.querySelector('#hero-image');
-            const rect = container.getBoundingClientRect();
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = ((e.clientY - rect.top - centerY) / 25) * -1;
-            const rotateY = (e.clientX - rect.left - centerX) / 25;
-            img.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
-        }
-        function resetTilt(container) {
-            container.querySelector('#hero-image').style.transform = `perspective(1000px) rotateX(0) rotateY(0) scale(1)`;
-        }
-
-        // PROGRESS BAR
+        // BARRA DE PROGRESO SUPERIOR
         window.addEventListener('scroll', () => {
             const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             document.getElementById("progressBar").style.width = ((winScroll / height) * 100) + "%";
-        });
-
-        // EFECTO MAGNÉTICO (NUEVO)
-        const magneticBtns = document.querySelectorAll('.magnetic-btn');
-        magneticBtns.forEach(btn => {
-            btn.addEventListener('mousemove', (e) => {
-                const rect = btn.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
-                gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.3, ease: "power2.out" });
-            });
-            btn.addEventListener('mouseleave', () => {
-                gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
-            });
         });
     </script>
 </body>
