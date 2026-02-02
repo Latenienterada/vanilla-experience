@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Minecraft Mod Side Checker</title>
+
+<style>
+body {
+  font-family: system-ui, -apple-system;
+  background: #0e0e13;
+  color: #fff;
+  padding: 40px;
+}
+
+h1 {
+  margin-bottom: 6px;
+}
+
+p {
+  opacity: 0.8;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+select {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: #1a1a22;
+  color: white;
+}
+
+.drop-zone {
+  border: 2px dashed #ff9acb;
+  border-radius: 18px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 30px;
+  transition: 0.2s;
+}
+
+.drop-zone.dragover {
+  background: rgba(255,154,203,0.12);
+}
+
+.mod {
+  background: #16161d;
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+}
+
+.side {
+  font-weight: bold;
+}
+
+.CLIENT { color: #7dd3fc; }
+.SERVER { color: #fca5a5; }
+.BOTH { color: #86efac; }
+.UNKNOWN, .ERROR { color: #facc15; }
+</style>
+</head>
+
+<body>
+
+<h1>Mod Side Checker</h1>
+<p>Arrastra uno o varios mods (.jar)</p>
+
+<div class="filters">
+  <select id="loader">
+    <option value="">Loader (cualquiera)</option>
+    <option value="fabric">Fabric</option>
+    <option value="forge">Forge</option>
+    <option value="neoforge">NeoForge</option>
+  </select>
+
+  <select id="mcVersion">
+    <option value="">MC Version (cualquiera)</option>
+    <option value="1.20.1">1.20.1</option>
+    <option value="1.21">1.21</option>
+  </select>
+</div>
+
+<div class="drop-zone" id="dropZone">
+  Suelta los mods aquí
+</div>
+
+<div id="mods"></div>
+
+<script>
+const dropZone = document.getElementById("dropZone");
+const modsDiv = document.getElementById("mods");
+const loaderSelect = document.getElementById("loader");
+const mcSelect = document.getElementById("mcVersion");
+
+let storedMods = JSON.parse(localStorage.getItem("mods") || "[]");
+render();
+
+/* ---------------- DRAG & DROP ---------------- */
+
+dropZone.addEventListener("dragover", e => {
+  e.preventDefault();
+  dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () => {
+  dropZone.classList.remove("dragover");
+});
+
+dropZone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropZone.classList.remove("dragover");
+  handleFiles([...e.dataTransfer.files]);
+});
+
+/* ---------------- CORE ---------------- */
+
+async function handleFiles(files) {
+  for (const file of files) {
+    if (!file.name.endsWith(".jar")) continue;
+
+    if (storedMods.some(m => m.file === file.name)) continue;
+
+    storedMods.push({
+      file: file.name,
+      title: "Analizando…",
+      version: "-",
+      side: "..."
+    });
+
+    render();
+    await analyzeMod(file);
+  }
+
+  localStorage.setItem("mods", JSON.stringify(storedMods));
+  render();
+}
+
+async function analyzeMod(file) {
+  const loader = loaderSelect.value;
+  const mc = mcSelect.value;
+  const name = file.name;
+
+  try {
+    const query = encodeURIComponent(name.replace(".jar", ""));
+    const res = await fetch(
+      `https://api.modrinth.com/v2/search?query=${query}&limit=10`
+    );
+    const data = await res.json();
+
+    for (const hit of data.hits) {
+      if (loader && !hit.loaders.includes(loader)) continue;
+
+      const versionsRes = await fetch(
+        `https://api.modrinth.com/v2/project/${hit.project_id}/version`
+      );
+      const versions = await versionsRes.json();
+
+      const exact = versions.find(v =>
+        (!mc || v.game_versions.includes(mc)) &&
+        v.files.some(f => f.filename === name)
+      );
+
+      if (!exact) continue;
+
+      const c = exact.client_side;
+      const s = exact.server_side;
+
+      let side = "BOTH";
+      if (c === "required" && s === "unsupported") side = "CLIENT";
+      if (s === "required" && c === "unsupported") side = "SERVER";
+
+      updateMod(name, hit.title, exact.version_number, side);
+      return;
+    }
+
+    updateMod(name, "No encontrado en Modrinth", "-", "UNKNOWN");
+
+  } catch (err) {
+    console.error(err);
+    updateMod(name, "Error consultando Modrinth", "-", "ERROR");
+  }
+}
+
+function updateMod(file, title, version, side) {
+  const mod = storedMods.find(m => m.file === file);
+  if (!mod) return;
+
+  mod.title = title;
+  mod.version = version;
+  mod.side = side;
+
+  localStorage.setItem("mods", JSON.stringify(storedMods));
+  render();
+}
+
+/* ---------------- UI ---------------- */
+
+function render() {
+  modsDiv.innerHTML = "";
+
+  storedMods.forEach(m => {
+    modsDiv.innerHTML += `
+      <div class="mod">
+        <strong>${m.file}</strong><br>
+        ${m.title}<br>
+        Versión: ${m.version}<br>
+        Side:
+        <span class="side ${m.side}">${m.side}</span>
+      </div>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>
